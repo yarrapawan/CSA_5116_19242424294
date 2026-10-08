@@ -1,0 +1,102 @@
+import random
+import string
+from collections import Counter
+
+
+QUADGRAMS = (
+    "TION21 MENT25 FTHE25 OFTH25 ATIO26 THER26 IONS26 CTIO26 NTHE26 "
+    "THAT26 SION27 OTHE27 ETHE27 THIS27 THES27 WITH27 LICE27 ICEN27 "
+    "CENS27 JECT27 BJEC27 ENSE27 STHE27 OBJE28 IBUT28 TRIB28 RIBU28 "
+    "LASS28 THEC28 CLAS28 ABLE28 EMEN28 STRI28 INTH28 IONO29 ECTI29 "
+    "CONT29 IONA29 SOFT29 VALU29 VERS29 ERSI29 TTHE29 FORM29 TYPE29 "
+    "NAME29 WORK29 UMEN29 RTHE29 THEL29 PRES30 INGT30 ENTS30 BUTE30 "
+    "HERE30 ENTI30 THEF30 RSIO30 CEPT30 SLIC30 EDIN30 EFOR30 HECO30 "
+    "COPY30 NGTH30 TOTH30 FUNC30 CODE30 ALUE30 EXCE30 ERTH30 EDBY30 "
+    "METH30 XCEP30 MPLE30 ONOF30 EFIN30 THEP30 UNCT30 PTIO30 ITIO30 "
+    "NCTI30 ISLI30 IONI30 CALL30 HISL30 ETHO30 RING30 EDTO31 DEFI31 "
+    "INST31 ETER31 SAND31 STAN31 SARE31 COMP31 DTHE31 IGHT31 STAT31 "
+    "ORMA31 THOD31 THED31 ENCE31 TING31 OVER31 ATTR31 THEN31 THEI31 "
+    "TATI31 THEO31 DING31 RIGH31 ISTR31 ERAT31 ATED31 NDER31 ONTH31 "
+    "HELI31 UNDE31 ESOF31 NSTA31 THEE31 FROM31 THET31 ESTH31 OPER31 "
+    "TATE31 SSIO31 YTHE31 ODIF31 SECT31 THEM31 SNOT31 EXPR31 MODI31 "
+    "LIST31 DIST31 IFTH31 LIBR31 IBRA31 BRAR31 INGA31 INTE31 ANCE31 "
+    "RESS31 RARY31 ESSI31 TERM31 GTHE31 EAND32 STHA32 SPEC32 IONT32 "
+    "EPRO32 OGRA32 TURN32 TTRI32 RETU32 ETUR32 UBLI32 IFIE32 TEME32 "
+    "SFOR32 ALLY32 HESE32 GRAM32 SING32 ECON32 ATEM32 EPTI32 TAIN32 "
+    "PROG32 ROGR32 ATTE32 EDTH32 INED32 ENTA32 HTHE32 INGS32 IMPL32 "
+    "ORTH32 PUBL32 XPRE32 TERA32 THEA32 EVAL32 PARA32 PART32 SEQU32 "
+    "SUCH32 TANC32 NOTI32 EOFT32 ANGE32 TTER32 TAND32 ANDT32 ICAT32 "
+    "LLOW32 WHEN32 ECTS32 ERAL32 WHIC32 HICH32 EXEC32 DOCU32 OCUM32 "
+    "CUME32 PERA32 LEME32 EQUE32 ECLA32 YOUM32 TRIN32 ARGU32 RGUM32 "
+    "GUME32 PECI32 ANDA32 ECUT32 ERED32 COVE32 EVER32 XECU33 NDTH33 "
+    "QUEN33 RMAT33 GENE33 FINE33 DIFI33 DICT33 CATI33 ENER33 ITEM33 "
+    "ITER33 FREE33 EOBJ33 HEPR33 SETH33 SIGN33 USED33 OUND33 SELF33 "
+    "TWAR33 TERN33 NDIN33 PORT33 AMES33 ONDI33 NOTA33 CLUD33 ASSI33 "
+    "INCL33 CHAN33 ELIB33 ITHT33 FORT33 DITI33 RESE33 WARE33 SINT33 "
+    "NTER33 MBER33 OFTW33 ENTT33 ONTA33 ONTR33 OURC33 MUST33 OULD33 "
+    "MODU33 ODUL33 ATTH33 FTWA33 THTH33 ERMI33 TABL33 CHAR33 DERT33 "
+    "ISNO33 RACT33 ENOT33 ONST33 WILL33 RAME33 YOUR33 NCLU33 INIT33 "
+    "INGO33 FTHI33 AMET33 UENC33 EPAR33 RATI33 BYTH33 FORA33 NOFT33 "
+    "NTAI33 DULE33 ONSA33 CESS33 ONLY33 AUSE33 ECOM33 HEEX33 ALSO33 "
+    "TIVE33 ONSO33 HAVE33 SOUR33 BLIC33 PLEM33 EINT33 TEXT33 PATT33 "
+    "UMBE33 PROV33 SAME33 RANT33 URCE33 NUMB33 RENT33 ICTI33 EWOR33 "
+    "ONIS33 VARI33 ALLE33 ETHA34 EDOC34 ASSE34 ONAL34 REAT34 ERMS34 "
+    "THEG34 APPL34 MEAN34 ATOR34 DINT34 ENTE34 FORE34 UTIO34 YRIG34 "
+    "NERA34 ITIS34 TERS34 EUSE34 ARAM34 SCRI34 EPRE34 NARY34 ROVI34 "
+    "DBYT34 CONS34 ESTA34 THAN34 ERRO34 TICE34 EQUI34 NING34 RROR34 "
+    "DFOR34 COMM34 RAIS34 INAL34 RATO34 NITI34 HESA34 HATT34 INGI34 "
+    "OPYR34 SENT34 IFIC34 TENT34 THEW34 THEB34 AREN34 FOLL34 OLLO34 "
+    "LLED34 FIED34 PYRI34 AISE34 ONSI34 HANG34 ARIA34 ORRE34 ENTH34 "
+    "ESAM34 PYTH34 NNOT34 TETH34 VERE34 PLIC34 OTIC34 NCES34 ITHA34 "
+    "ESEN34 OUMA34 OVID34 ANDS34"
+)
+COST = {item[:4]: int(item[4:]) for item in "".join(QUADGRAMS).split()}
+MISSING = 40
+ENGLISH_ORDER = "ETAOINSHRDLCUMWFGYPBVKJXQZ"
+
+
+def cost(text):
+    return sum(COST.get(text[i:i + 4], MISSING) for i in range(len(text) - 3))
+
+
+def decode(ciphertext, key):
+    return ciphertext.translate(str.maketrans(key))
+
+
+def hill_climb(ciphertext, key):
+    letters = string.ascii_uppercase
+    best = cost(decode(ciphertext, key))
+    improved = True
+    while improved:
+        improved = False
+        for i in range(26):
+            for j in range(i + 1, 26):
+                a, b = letters[i], letters[j]
+                key[a], key[b] = key[b], key[a]
+                score = cost(decode(ciphertext, key))
+                if score < best:
+                    best, improved = score, True
+                else:
+                    key[a], key[b] = key[b], key[a]
+    return best, key
+
+
+ciphertext = input("Enter the ciphertext: ").upper()
+top = int(input("How many top plaintexts do you want to see: "))
+ciphertext = "".join(c for c in ciphertext if c.isalpha())
+order = [c for c, _ in Counter(ciphertext).most_common()]
+order += [c for c in string.ascii_uppercase if c not in order]
+start = dict(zip(order, ENGLISH_ORDER))
+random.seed(2024)
+found = {}
+for attempt in range(20):
+    key = dict(start)
+    for _ in range(attempt % 7 + (3 if attempt else 0)):
+        a, b = random.sample(string.ascii_uppercase, 2)
+        key[a], key[b] = key[b], key[a]
+    score, key = hill_climb(ciphertext, key)
+    found[decode(ciphertext, key)] = score
+ranked = sorted(found.items(), key=lambda item: item[1])
+print("Rank  Cost    Plaintext (lower cost = more likely English)")
+for rank, (plain, score) in enumerate(ranked[:top], 1):
+    print("%3d   %5d   %s" % (rank, score, plain))
